@@ -13,7 +13,8 @@ jobs:
       - name: ⬇️ Checkout Repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Required to commit later
+          fetch-depth: 0
+          persist-credentials: true  # ✅ This lets git push work
 
       - name: 🐍 Set Up Python
         uses: actions/setup-python@v4
@@ -33,5 +34,7 @@ jobs:
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
           git add wake_up_log.csv
-          git commit -m "🕒 Update log $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          git commit -m "🔄 Update log $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

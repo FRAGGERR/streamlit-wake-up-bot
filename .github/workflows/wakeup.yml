@@ -42,7 +42,9 @@ jobs:
 
       - name: 📬 Send Telegram Notification
         run: |
+          set +e  # Don't exit on error
           echo "Parsing CSV for Telegram notification"
+
           last_line=$(tail -n 1 wake_up_log.csv)
           IFS=',' read -ra values <<< "$last_line"
           timestamp=${values[0]}
@@ -71,8 +73,10 @@ jobs:
 
           echo -e "$message"
 
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          curl_response=$(curl -s -w "%{http_code}" -o response.txt -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
             -d text="$message" \
-            -d parse_mode="Markdown"
+            -d parse_mode="Markdown")
 
+          echo "Telegram API HTTP status: $curl_response"
+          cat response.txt

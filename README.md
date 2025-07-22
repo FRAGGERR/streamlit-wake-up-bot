@@ -1,5 +1,14 @@
 <h1 align="center">Stepwise DPO Fine-Tuning with TinyLlama</h1>
 
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/FRAGGERR/streamlit-wake-up-bot/wakeup.yml?label=CI%2FCD&logo=github&style=flat-square)
+![Repo Size](https://img.shields.io/github/repo-size/fraggerr/streamlit-wake-up-bot?style=flat-square)
+![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&style=flat-square)
+![Selenium](https://img.shields.io/badge/Selenium-Automation-green?logo=selenium&style=flat-square)
+![Telegram Bot](https://img.shields.io/badge/Telegram-Bot%20Enabled-0088cc?logo=telegram&logoColor=white&style=flat-square)
+![License](https://img.shields.io/github/license/fraggerr/streamlit-wake-up-bot?style=flat-square)
+![Last Commit](https://img.shields.io/github/last-commit/fraggerr/streamlit-wake-up-bot?style=flat-square)
+
+
 A GitHub Actions-powered bot to automatically wake up your free Streamlit apps using Selenium, and send you real-time status reports via Telegram.
 
 This project is ideal for keeping your Streamlit apps responsive and minimizing cold-start delays caused by inactivity on the free tier.

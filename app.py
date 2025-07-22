@@ -5,10 +5,11 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-import time
 from datetime import datetime, timedelta
+import requests
 import os
 import csv
+import time
 
 # 🔗 Streamlit app URLs
 urls = {
@@ -28,44 +29,59 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # ⏰ Get current time in IST
 ist_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
-
-# 📊 Prepare log row
 log_row = {"timestamp": ist_time.strftime("%Y-%m-%d %H:%M:%S")}
+messages = []
 
 # 🔁 Loop through each app
 for name, url in urls.items():
-    print(f"\n🚀 Opening: {url}")
     try:
+        print(f"\n🚀 Opening: {url}")
         driver.get(url)
 
-        # ⏳ Wait for "wake-up" button
         wait = WebDriverWait(driver, 20)
         button = wait.until(EC.element_to_be_clickable(
             (By.XPATH, "//button[contains(., 'get this app back up')]")
         ))
 
         button.click()
-        print(f"✅ Wake-up button clicked for: {url}")
+        print(f"✅ Wake-up button clicked for: {name}")
         log_row[name] = "clicked"
+        messages.append(f"🟢 {name.replace('_', ' ').title()} was asleep and has been woken up.")
+
         time.sleep(5)
 
     except Exception as e:
-        print(f"⚠️ Skipped or already awake: {url} — {str(e)}")
+        print(f"⚠️ Skipped or already awake: {name} — {str(e)}")
         log_row[name] = "already_awake_or_error"
+        messages.append(f"🟡 {name.replace('_', ' ').title()} is already awake or unreachable.")
 
-# ✅ Done
 driver.quit()
 print("\n🎉 All apps processed.")
 
-# 📁 CSV Logging
+# 💬 Send Telegram Message
+bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+
+if bot_token and chat_id:
+    message_text = f"📡 Streamlit Wake-Up Report ({log_row['timestamp']} IST):\n\n" + "\n".join(messages)
+    telegram_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    try:
+        response = requests.post(telegram_url, data={
+            "chat_id": chat_id,
+            "text": message_text,
+            "parse_mode": "Markdown"
+        })
+        print(f"📨 Telegram message sent. Status: {response.status_code}")
+    except Exception as ex:
+        print(f"❌ Failed to send Telegram message: {str(ex)}")
+
+# 📁 Write to CSV
 log_file = "wake_up_log.csv"
 fieldnames = ["timestamp"] + list(urls.keys())
-
 file_exists = os.path.isfile(log_file)
+
 with open(log_file, mode='a', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
     if not file_exists or os.stat(log_file).st_size == 0:
         writer.writeheader()
-
     writer.writerow(log_row)

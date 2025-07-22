@@ -58,9 +58,15 @@ for name, url in urls.items():
 driver.quit()
 print("\n🎉 All apps processed.")
 
+
+
 # 💬 Send Telegram Message
 bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
 chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+
+print(f"Telegram Credentials Check:") #add this
+print(f"Bot Token Present: {bool(bot_token)}")
+print(f"Chat ID Present: {bool(chat_id)}") #add this
 
 if bot_token and chat_id:
     message_text = f"📡 Streamlit Wake-Up Report ({log_row['timestamp']} IST):\n\n" + "\n".join(messages)
@@ -74,6 +80,9 @@ if bot_token and chat_id:
         print(f"📨 Telegram message sent. Status: {response.status_code}")
     except Exception as ex:
         print(f"❌ Failed to send Telegram message: {str(ex)}")
+
+print(f"Telegram API Response: {response.status_code}") # add this
+print(f"Response Text: {response.text}")  # Add this
 
 # 📁 Write to CSV
 log_file = "wake_up_log.csv"

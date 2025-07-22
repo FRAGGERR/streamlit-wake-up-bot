@@ -42,7 +42,8 @@ jobs:
 
       - name: 📬 Send Telegram Notification
         run: |
-          set +e  # Don't exit on error
+          set +e  # Continue even if error
+
           echo "Parsing CSV for Telegram notification"
 
           last_line=$(tail -n 1 wake_up_log.csv)
@@ -73,10 +74,18 @@ jobs:
 
           echo -e "$message"
 
-          curl_response=$(curl -s -w "%{http_code}" -o response.txt -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          echo "Sending to Telegram..."
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
             -d text="$message" \
-            -d parse_mode="Markdown")
+            -d parse_mode="Markdown"
 
-          echo "Telegram API HTTP status: $curl_response"
-          cat response.txt
+          curl_exit=$?
+          if [[ $curl_exit -ne 0 ]]; then
+            echo "❌ Telegram message failed to send. curl exit code: $curl_exit"
+            exit 1
+          else
+            echo "✅ Message sent to Telegram successfully"
+          fi
+

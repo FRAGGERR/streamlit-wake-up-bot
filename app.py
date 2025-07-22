@@ -39,23 +39,34 @@ for name, url in urls.items():
         driver.get(url)
 
         wait = WebDriverWait(driver, 20)
-        button = wait.until(EC.element_to_be_clickable(
-            (By.XPATH, "//button[contains(., 'get this app back up')]")
-        ))
 
-        button.click()
-        print(f"✅ Wake-up button clicked for: {name}")
-        log_row[name] = "clicked"
-        messages.append(f"🟢 {name.replace('_', ' ').title()} was asleep and has been woken up.")
-        messages.append("")
+        try:
+            # Try finding the wake-up button
+            button = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[contains(., 'get this app back up')]")
+            ))
+            button.click()
+            print(f"✅ Wake-up button clicked for: {name}")
+            log_row[name] = "clicked"
+            messages.append(f"🟢 {name.replace('_', ' ').title()} was asleep and has been woken up.")
+            messages.append("")
+
+        except:
+            # If no button found, it's likely already awake
+            print(f"🔄 {name} is already awake.")
+            log_row[name] = "already_awake"
+            messages.append(f"🟡 {name.replace('_', ' ').title()} is already awake.")
+            messages.append("")
 
         time.sleep(5)
 
     except Exception as e:
-        print(f"⚠️ Skipped or already awake: {name} — {str(e)}")
-        log_row[name] = "already_awake_or_error"
-        messages.append(f"🟡 {name.replace('_', ' ').title()} is already awake or unreachable.")
+        # Other errors (timeout, DNS, etc.)
+        print(f"❌ Error loading {name}: {str(e)}")
+        log_row[name] = "error"
+        messages.append(f"🔴 {name.replace('_', ' ').title()} could not be reached. Error: {str(e)}")
         messages.append("")
+
 
 driver.quit()
 print("\n🎉 All apps processed.")

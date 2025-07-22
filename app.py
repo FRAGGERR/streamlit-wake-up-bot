@@ -47,6 +47,7 @@ for name, url in urls.items():
         print(f"✅ Wake-up button clicked for: {name}")
         log_row[name] = "clicked"
         messages.append(f"🟢 {name.replace('_', ' ').title()} was asleep and has been woken up.")
+        messages.append("")
 
         time.sleep(5)
 
@@ -54,6 +55,7 @@ for name, url in urls.items():
         print(f"⚠️ Skipped or already awake: {name} — {str(e)}")
         log_row[name] = "already_awake_or_error"
         messages.append(f"🟡 {name.replace('_', ' ').title()} is already awake or unreachable.")
+        messages.append("")
 
 driver.quit()
 print("\n🎉 All apps processed.")

@@ -40,30 +40,39 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📨 Send Telegram Notification
+      - name: 📬 Send Telegram Notification
         run: |
           echo "Parsing CSV for Telegram notification"
-          LAST_LINE=$(tail -n 1 wake_up_log.csv)
-          IFS="," read -ra FIELDS <<< "$LAST_LINE"
-          MSG="\n⏰ Wake-Up Report: ${FIELDS[0]}\n\n"
+          last_line=$(tail -n 1 wake_up_log.csv)
+          IFS=',' read -ra values <<< "$last_line"
+          timestamp=${values[0]}
+          clearsight_status=${values[1]}
+          incident_status=${values[2]}
 
-          HEADER=$(head -n 1 wake_up_log.csv)
-          IFS="," read -ra APP_NAMES <<< "$HEADER"
+          message="📊 *Streamlit Wake-Up Report* — $timestamp\n\n"
+          message+="🧠 clearsight: "
+          if [[ "$clearsight_status" == "clicked" ]]; then
+            message+="✅ woke up"
+          elif [[ "$clearsight_status" == "already_awake_or_error" ]]; then
+            message+="⚠️ already running or error"
+          else
+            message+="❓ unknown"
+          fi
+          message+="\n"
 
-          for i in "${!APP_NAMES[@]}"; do
-            if [ "$i" -ne 0 ]; then
-              STATUS="${FIELDS[$i]}"
-              NAME="${APP_NAMES[$i]}"
-              if [ "$STATUS" == "clicked" ]; then
-                MSG+="🌟 $NAME woke up successfully\n"
-              elif [ "$STATUS" == "already_awake_or_error" ]; then
-                MSG+="⚠️ $NAME already running or had an error\n"
-              else
-                MSG+="❓ $NAME status unknown\n"
-              fi
-            fi
-          done
+          message+="🚨 incident_management: "
+          if [[ "$incident_status" == "clicked" ]]; then
+            message+="✅ woke up"
+          elif [[ "$incident_status" == "already_awake_or_error" ]]; then
+            message+="⚠️ already running or error"
+          else
+            message+="❓ unknown"
+          fi
 
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
-            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-            -d text="$MSG"
+          echo -e "$message"
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d text="$message" \
+            -d parse_mode="Markdown"
+

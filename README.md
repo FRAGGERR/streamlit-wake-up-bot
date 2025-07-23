@@ -1,4 +1,4 @@
-<h1 align="center">Stepwise DPO Fine-Tuning with TinyLlama</h1>
+<h1 align="center">Streamlit Auto Wake and Status Reporter via Telegram</h1>
 
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/FRAGGERR/streamlit-wake-up-bot/wakeup.yml?label=CI%2FCD&logo=github&style=flat-square)
 ![Repo Size](https://img.shields.io/github/repo-size/fraggerr/streamlit-wake-up-bot?style=flat-square)
